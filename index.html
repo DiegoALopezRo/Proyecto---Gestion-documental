@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Documental</title>
+</head>
+<body>
+    <h1>Subir Documento</h1>
+    <form id="uploadForm">
+        <input type="file" name="documento" required>
+        <button type="submit">Subir</button>
+    </form>
+
+    <h2>Documentos Subidos</h2>
+    <ul id="documentList"></ul>
+
+    <script>
+        // Función para cargar documentos
+        async function loadDocuments() {
+            const response = await fetch('/documentos');
+            const documentos = await response.json();
+            const list = document.getElementById('documentList');
+            list.innerHTML = ''; // Limpiar la lista
+
+            documentos.forEach(doc => {
+                const listItem = document.createElement('li');
+                listItem.textContent = doc; // Puedes modificar esto para mostrar más información
+                list.appendChild(listItem);
+            });
+        }
+
+        // Manejar el evento de subir el formulario
+        document.getElementById('uploadForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevenir el comportamiento por defecto del formulario
+
+            const formData = new FormData(event.target);
+
+            await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            // Cargar los documentos después de subir uno nuevo
+            loadDocuments();
+            event.target.reset(); // Reiniciar el formulario
+        });
+
+        // Cargar documentos al inicio
+        loadDocuments();
+    </script>
+</body>
+</html>
