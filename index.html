@@ -3,51 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Documental</title>
+    <title>Gestión Documental - Product Owner</title>
 </head>
 <body>
     <h1>Subir Documento</h1>
-    <form id="uploadForm">
-        <input type="file" name="documento" required>
-        <button type="submit">Subir</button>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="documento" required />
+        <button type="submit">Subir Documento</button>
     </form>
 
     <h2>Documentos Subidos</h2>
     <ul id="documentList"></ul>
 
+    <h2>Eliminar Documento</h2>
+    <input type="text" id="docName" placeholder="Nombre del Documento" />
+    <button id="deleteBtn">Eliminar Documento</button>
+
     <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const documentList = document.getElementById('documentList');
+        const deleteBtn = document.getElementById('deleteBtn');
+
         // Función para cargar documentos
         async function loadDocuments() {
             const response = await fetch('/documentos');
             const documentos = await response.json();
-            const list = document.getElementById('documentList');
-            list.innerHTML = ''; // Limpiar la lista
-
+            documentList.innerHTML = '';
             documentos.forEach(doc => {
-                const listItem = document.createElement('li');
-                listItem.textContent = doc; // Puedes modificar esto para mostrar más información
-                list.appendChild(listItem);
+                const li = document.createElement('li');
+                li.textContent = doc;
+                documentList.appendChild(li);
             });
         }
 
-        // Manejar el evento de subir el formulario
-        document.getElementById('uploadForm').addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevenir el comportamiento por defecto del formulario
+        // Cargar documentos al cargar la página
+        window.onload = loadDocuments;
 
-            const formData = new FormData(event.target);
-
+        // Manejar el envío del formulario
+        uploadForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(uploadForm);
             await fetch('/upload', {
                 method: 'POST',
                 body: formData
             });
-
-            // Cargar los documentos después de subir uno nuevo
             loadDocuments();
-            event.target.reset(); // Reiniciar el formulario
-        });
+        };
 
-        // Cargar documentos al inicio
-        loadDocuments();
+        // Manejar la eliminación de un documento
+        deleteBtn.onclick = async () => {
+            const nombre = document.getElementById('docName').value;
+            await fetch(`/documentos/${nombre}`, {
+                method: 'DELETE'
+            });
+            loadDocuments();
+        };
     </script>
 </body>
 </html>
